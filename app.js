@@ -3,6 +3,8 @@ const handlebars = require('express-handlebars')
 const db = require('./models')
 const flash = require('connect-flash')
 const session = require('express-session')
+const passport = require('./config/passport')
+
 const app = express()
 const port = 3000
 
@@ -12,24 +14,29 @@ app.engine('handlebars', handlebars({ defaultLayout: 'main' }))
 app.set('view engine', 'handlebars')
 // setup bodyParser
 app.use(express.urlencoded({ extended: true }))
-// setup session and flash
+// setup session
 app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }))
+// setup passport
+app.use(passport.initialize())
+app.use(passport.session())
+// setup flash
 app.use(flash())
 // 把 req.flash 放到 res.locals 裡面
-app.use((req,res,next)=>{
-  res.locals.success_messages=req.flash('success_massages')
-  res.locals.error_messages=req.flash('error_messages')
+app.use((req, res, next) => {
+  res.locals.success_messages = req.flash('success_messages')
+  res.locals.error_messages = req.flash('error_messages')
   next()
 })
 
-
+// listen to port 3000
 app.listen(port, () => {
   db.sequelize.sync()
   console.log(`Example app listening at http://localhost:${port}`)
 })
 
 // 引入 routes 並將 app 傳進去，讓 routes 可以用 app 這個物件來指定路由
-require('./routes')(app)
+// 把 passport 傳入 routes
+require('./routes')(app, passport)
 
 // 導入自動化測試以後，由於測試環境會用到app，所以需要在文件最下方輸出app
 module.exports = app
