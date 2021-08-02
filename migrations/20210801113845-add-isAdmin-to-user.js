@@ -3,9 +3,9 @@
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     // Add altering commands here.
-    await queryInterface.addColumn('Users','isAdmin',{
-    type: Sequelize.BOOLEAN,
-    defaultValue:0
+    await queryInterface.addColumn('Users', 'isAdmin', {
+      type: Sequelize.BOOLEAN,
+      defaultValue: false
     })
   },
 
