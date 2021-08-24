@@ -1,6 +1,7 @@
 // 後台入口
 const db = require('../models')
 const Restaurant = db.Restaurant
+const User = db.User
 const imgur = require('imgur-node-api')
 const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
 
@@ -118,6 +119,29 @@ const adminController = {
             res.redirect('/admin/restaurants')
           })
       })
+  },
+
+  // 使用者清單
+  getUsers: (req, res) => {
+    User.findAll({ raw: true, nest: true })
+      .then(users => res.render('admin/users', { users }))
+      .catch(error => res.status(422).json(error))
+  },
+
+  toggleAdmin: (req, res) => {
+    const id = Number(req.params.id)
+    if (id === req.user.id) {
+      req.flash('error_messages', `not available to toggle user's own role`)
+      return res.redirect('/admin/users')
+    }
+
+    User.findByPk(id)
+      .then(user => user.update({ isAdmin: !user.isAdmin }))
+      .then(user => {
+        req.flash('success_messages', 'user was successfully to update')
+        res.redirect('/admin/users')
+      })
+      .catch(error => res.status(422).json(error))
   }
 }
 
